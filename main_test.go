@@ -158,10 +158,18 @@ func TestSync(t *testing.T) {
 	destDir := t.TempDir()
 
 	// Create source files
-	os.WriteFile(filepath.Join(srcDir, "file1.txt"), []byte("hello"), 0644)
-	os.MkdirAll(filepath.Join(srcDir, "subdir"), 0755)
-	os.WriteFile(filepath.Join(srcDir, "subdir", "file2.txt"), []byte("world"), 0644)
-	os.WriteFile(filepath.Join(srcDir, "ignore.log"), []byte("logs"), 0644)
+	if err := os.WriteFile(filepath.Join(srcDir, "file1.txt"), []byte("hello"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(srcDir, "subdir"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(srcDir, "subdir", "file2.txt"), []byte("world"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(srcDir, "ignore.log"), []byte("logs"), 0644); err != nil {
+		t.Fatal(err)
+	}
 
 	// Sync with exclusion
 	err := sync(srcDir, destDir, []string{"*.log"})
@@ -188,10 +196,14 @@ func TestSyncRemovesOrphans(t *testing.T) {
 	destDir := t.TempDir()
 
 	// Create source file
-	os.WriteFile(filepath.Join(srcDir, "keep.txt"), []byte("keep"), 0644)
+	if err := os.WriteFile(filepath.Join(srcDir, "keep.txt"), []byte("keep"), 0644); err != nil {
+		t.Fatal(err)
+	}
 
 	// Create orphan in destination
-	os.WriteFile(filepath.Join(destDir, "orphan.txt"), []byte("orphan"), 0644)
+	if err := os.WriteFile(filepath.Join(destDir, "orphan.txt"), []byte("orphan"), 0644); err != nil {
+		t.Fatal(err)
+	}
 
 	// Sync
 	err := sync(srcDir, destDir, nil)
@@ -215,15 +227,22 @@ func TestRunWithNameFlag(t *testing.T) {
 	destDir := t.TempDir()
 
 	// Create source file
-	os.WriteFile(filepath.Join(srcDir, "test.txt"), []byte("test"), 0644)
+	if err := os.WriteFile(filepath.Join(srcDir, "test.txt"), []byte("test"), 0644); err != nil {
+		t.Fatal(err)
+	}
 
 	// Change to source directory
-	origDir, _ := os.Getwd()
-	os.Chdir(srcDir)
-	defer os.Chdir(origDir)
+	origDir, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chdir(srcDir); err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = os.Chdir(origDir) }()
 
 	// Run with custom name
-	err := run([]string{"--to", destDir, "--name", "CustomName"})
+	err = run([]string{"--to", destDir, "--name", "CustomName"})
 	if err != nil {
 		t.Fatalf("run() error = %v", err)
 	}
@@ -239,15 +258,22 @@ func TestRunWithoutNameFlag(t *testing.T) {
 	destDir := t.TempDir()
 
 	// Create source file
-	os.WriteFile(filepath.Join(srcDir, "test.txt"), []byte("test"), 0644)
+	if err := os.WriteFile(filepath.Join(srcDir, "test.txt"), []byte("test"), 0644); err != nil {
+		t.Fatal(err)
+	}
 
 	// Change to source directory
-	origDir, _ := os.Getwd()
-	os.Chdir(srcDir)
-	defer os.Chdir(origDir)
+	origDir, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chdir(srcDir); err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = os.Chdir(origDir) }()
 
 	// Run without --name (should use directory name)
-	err := run([]string{"--to", destDir})
+	err = run([]string{"--to", destDir})
 	if err != nil {
 		t.Fatalf("run() error = %v", err)
 	}
